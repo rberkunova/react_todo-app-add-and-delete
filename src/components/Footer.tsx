@@ -1,4 +1,5 @@
 import React from 'react';
+import classNames from 'classnames'; // Імпорт бібліотеки classnames
 import { Todo } from '../types/Todo';
 
 interface FooterProps {
@@ -23,7 +24,7 @@ const Footer: React.FC<FooterProps> = ({
     <nav className="filter" data-cy="Filter">
       <a
         href="#/"
-        className={`filter__link ${filter === 'all' ? 'selected' : ''}`}
+        className={classNames('filter__link', { selected: filter === 'all' })} // Використання classnames
         data-cy="FilterLinkAll"
         onClick={() => setFilter('all')}
       >
@@ -31,7 +32,9 @@ const Footer: React.FC<FooterProps> = ({
       </a>
       <a
         href="#/active"
-        className={`filter__link ${filter === 'active' ? 'selected' : ''}`}
+        className={classNames('filter__link', {
+          selected: filter === 'active',
+        })} // Використання classnames
         data-cy="FilterLinkActive"
         onClick={() => setFilter('active')}
       >
@@ -39,7 +42,9 @@ const Footer: React.FC<FooterProps> = ({
       </a>
       <a
         href="#/completed"
-        className={`filter__link ${filter === 'completed' ? 'selected' : ''}`}
+        className={classNames('filter__link', {
+          selected: filter === 'completed',
+        })} // Використання classnames
         data-cy="FilterLinkCompleted"
         onClick={() => setFilter('completed')}
       >

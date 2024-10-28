@@ -6,6 +6,7 @@ import { Todo } from './types/Todo';
 import Header from './components/Header';
 import TodoList from './components/TodoList';
 import Footer from './components/Footer';
+import classNames from 'classnames';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -50,6 +51,7 @@ export const App: React.FC = () => {
     }
   }, [error]);
 
+  // Фільтрація todos
   const filteredTodos = todos.filter(todo => {
     if (filter === 'active') {
       return !todo.completed;
@@ -65,6 +67,7 @@ export const App: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    // Перевіряємо, чи заголовок не порожній
     if (!newTodoTitle.trim()) {
       setError('Title should not be empty');
 
@@ -75,6 +78,7 @@ export const App: React.FC = () => {
 
     setIsSubmitting(true);
 
+    // Створюємо тимчасову задачу `tempTodo`
     const newTempTodo: Todo = {
       id: Date.now(),
       userId: USER_ID,
@@ -82,45 +86,46 @@ export const App: React.FC = () => {
       completed: false,
     };
 
-    setTempTodo(newTempTodo);
+    // Додаємо `tempTodo` до списку
     setTodos(prevTodos => [...prevTodos, newTempTodo]);
+    setTempTodo(newTempTodo); // Встановлюємо тимчасову задачу
 
     try {
+      // Додаємо задачу на сервер
       const createdTodo = await addTodo({
         userId: USER_ID,
         title: trimmedTitle,
         completed: false,
       });
 
+      // Оновлюємо `todos`, замінюючи `tempTodo` на реальну задачу
       setTodos(prevTodos =>
         prevTodos.map(todo =>
           todo.id === newTempTodo.id ? createdTodo : todo,
         ),
       );
 
+      // Очищуємо поле вводу
       setNewTodoTitle('');
-
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 0);
     } catch {
+      // В обробці помилки видаляємо `tempTodo` з `todos`
       setError('Unable to add a todo');
       setTodos(prevTodos =>
         prevTodos.filter(todo => todo.id !== newTempTodo.id),
       );
-
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 0);
     } finally {
+      // Очищаємо тимчасову задачу
       setTempTodo(null);
       setIsSubmitting(false);
     }
   };
+
+  // Використання useEffect для фокусування на полі вводу після подачі
+  useEffect(() => {
+    if (!isSubmitting && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isSubmitting]); // Залежність на isSubmitting
 
   const activeCount = todos.filter(
     todo => !todo.completed && todo !== tempTodo,
@@ -134,7 +139,6 @@ export const App: React.FC = () => {
     }
 
     setTempTodo(todoToDelete);
-
     try {
       await deleteTodo(todoId);
       setTodos(prevTodos => prevTodos.filter(todo => todo.id !== todoId));
@@ -142,7 +146,6 @@ export const App: React.FC = () => {
       setError('Unable to delete a todo');
     } finally {
       setTempTodo(null);
-
       if (inputRef.current) {
         inputRef.current.focus();
       }
@@ -192,7 +195,13 @@ export const App: React.FC = () => {
       </div>
       <div
         data-cy="ErrorNotification"
-        className={`notification is-danger is-light has-text-weight-normal ${error ? '' : 'hidden'}`}
+        className={classNames(
+          'notification',
+          'is-danger',
+          'is-light',
+          'has-text-weight-normal',
+          { hidden: !error },
+        )}
       >
         <button
           data-cy="HideErrorButton"
