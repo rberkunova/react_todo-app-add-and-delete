@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
 import { Todo } from '../types/Todo';
 import TodoItem from './TodoItem';
@@ -17,18 +18,16 @@ const TodoList: React.FC<TodoListProps> = ({
   handleDelete,
 }) => (
   <section className="todoapp__main" data-cy="TodoList">
-    {loading ? (
-      <div className="loader">Loading...</div>
-    ) : (
-      todos.map(todo => (
+    {loading
+      ? null
+      : todos.map(todo => (
         <TodoItem
           key={todo.id}
           todo={todo}
           handleDelete={handleDelete}
           tempTodo={tempTodo}
         />
-      ))
-    )}
+      ))}
   </section>
 );
 
