@@ -7,17 +7,18 @@ import Header from './components/Header';
 import TodoList from './components/TodoList';
 import Footer from './components/Footer';
 import classNames from 'classnames';
+import { FilterState } from './types/Filter';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState<FilterState>(FilterState.All);
+
   const [newTodoTitle, setNewTodoTitle] = useState('');
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Реф для фокусування на полі вводу
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -51,13 +52,12 @@ export const App: React.FC = () => {
     }
   }, [error]);
 
-  // Фільтрація todos
   const filteredTodos = todos.filter(todo => {
-    if (filter === 'active') {
+    if (filter === FilterState.Active) {
       return !todo.completed;
     }
 
-    if (filter === 'completed') {
+    if (filter === FilterState.Completed) {
       return todo.completed;
     }
 
@@ -67,7 +67,6 @@ export const App: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    // Перевіряємо, чи заголовок не порожній
     if (!newTodoTitle.trim()) {
       setError('Title should not be empty');
 
@@ -78,7 +77,6 @@ export const App: React.FC = () => {
 
     setIsSubmitting(true);
 
-    // Створюємо тимчасову задачу `tempTodo`
     const newTempTodo: Todo = {
       id: Date.now(),
       userId: USER_ID,
@@ -86,46 +84,38 @@ export const App: React.FC = () => {
       completed: false,
     };
 
-    // Додаємо `tempTodo` до списку
     setTodos(prevTodos => [...prevTodos, newTempTodo]);
-    setTempTodo(newTempTodo); // Встановлюємо тимчасову задачу
+    setTempTodo(newTempTodo);
 
     try {
-      // Додаємо задачу на сервер
       const createdTodo = await addTodo({
         userId: USER_ID,
         title: trimmedTitle,
         completed: false,
       });
 
-      // Оновлюємо `todos`, замінюючи `tempTodo` на реальну задачу
       setTodos(prevTodos =>
         prevTodos.map(todo =>
           todo.id === newTempTodo.id ? createdTodo : todo,
         ),
       );
-
-      // Очищуємо поле вводу
       setNewTodoTitle('');
     } catch {
-      // В обробці помилки видаляємо `tempTodo` з `todos`
       setError('Unable to add a todo');
       setTodos(prevTodos =>
         prevTodos.filter(todo => todo.id !== newTempTodo.id),
       );
     } finally {
-      // Очищаємо тимчасову задачу
       setTempTodo(null);
       setIsSubmitting(false);
     }
   };
 
-  // Використання useEffect для фокусування на полі вводу після подачі
   useEffect(() => {
     if (!isSubmitting && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isSubmitting]); // Залежність на isSubmitting
+  }, [isSubmitting]);
 
   const activeCount = todos.filter(
     todo => !todo.completed && todo !== tempTodo,

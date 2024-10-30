@@ -29,12 +29,6 @@ const TodoList: React.FC<TodoListProps> = ({
         />
       ))
     )}
-    {tempTodo && (
-      <div className="todo todo--temp" data-cy="TempTodo">
-        <span className="todo__title">{tempTodo.title}</span>
-        <div className="loader" />
-      </div>
-    )}
   </section>
 );
 

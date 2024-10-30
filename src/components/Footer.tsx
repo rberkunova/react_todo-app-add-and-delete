@@ -1,11 +1,12 @@
 import React from 'react';
-import classNames from 'classnames'; // Імпорт бібліотеки classnames
+import classNames from 'classnames';
 import { Todo } from '../types/Todo';
+import { FilterState } from '../types/Filter';
 
 interface FooterProps {
   activeCount: number;
-  filter: string;
-  setFilter: (filter: string) => void;
+  filter: FilterState;
+  setFilter: (filter: FilterState) => void;
   handleDeleteCompletedTodos: () => void;
   todos: Todo[];
 }
@@ -24,29 +25,31 @@ const Footer: React.FC<FooterProps> = ({
     <nav className="filter" data-cy="Filter">
       <a
         href="#/"
-        className={classNames('filter__link', { selected: filter === 'all' })} // Використання classnames
+        className={classNames('filter__link', {
+          selected: filter === FilterState.All,
+        })}
         data-cy="FilterLinkAll"
-        onClick={() => setFilter('all')}
+        onClick={() => setFilter(FilterState.All)}
       >
         All
       </a>
       <a
         href="#/active"
         className={classNames('filter__link', {
-          selected: filter === 'active',
-        })} // Використання classnames
+          selected: filter === FilterState.Active,
+        })}
         data-cy="FilterLinkActive"
-        onClick={() => setFilter('active')}
+        onClick={() => setFilter(FilterState.Active)}
       >
         Active
       </a>
       <a
         href="#/completed"
         className={classNames('filter__link', {
-          selected: filter === 'completed',
-        })} // Використання classnames
+          selected: filter === FilterState.Completed,
+        })}
         data-cy="FilterLinkCompleted"
-        onClick={() => setFilter('completed')}
+        onClick={() => setFilter(FilterState.Completed)}
       >
         Completed
       </a>
